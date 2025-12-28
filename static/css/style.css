@@ -1,13 +1,13 @@
-/* 1. 基本リセット (ズレの原因を排除) */
+/* 1. 基本リセット */
 * {
-    box-sizing: border-box; /* パディングを幅に含める(必須) */
+    box-sizing: border-box;
 }
 
 html, body {
     width: 100%;
     margin: 0;
     padding: 0;
-    overflow-x: hidden; /* 横スクロール禁止 */
+    overflow-x: hidden;
     font-family: 'Yusei Magic', 'Helvetica Neue', Arial, sans-serif;
     background-color: #fdf5e6;
     background-image: radial-gradient(#e6c1c1 15%, transparent 16%), radial-gradient(#e6c1c1 15%, transparent 16%);
@@ -19,8 +19,8 @@ html, body {
 /* 2. メインレイアウト */
 .main-wrapper {
     width: 100%;
-    max-width: 600px; /* PCで見すぎないように制限 */
-    margin: 0 auto;   /* PCでは中央寄せ */
+    max-width: 600px;
+    margin: 0 auto;
     padding: 20px 10px;
     display: flex;
     flex-direction: column;
@@ -37,17 +37,14 @@ html, body {
     line-height: 1.3;
 }
 
-/* 3. ルーレット外枠 (レスポンシブ対応の要) */
+/* 3. ルーレット外枠 */
 .roulette-decoration-ring {
-    /* 画面の短辺(vmin)の90%を基準にする = 縦でも横でも画面に収まる */
     width: 90vmin;
     height: 90vmin;
-    
-    /* 最大サイズの制限 */
     max-width: 340px;
     max-height: 340px;
     
-    margin: 0 auto 30px auto; /* 上下左右中央 */
+    margin: 0 auto 30px auto;
     
     border: 5px solid #fff;
     border-radius: 50%;
@@ -59,7 +56,6 @@ html, body {
     justify-content: center;
     position: relative;
     
-    /* 正方形を維持 */
     aspect-ratio: 1 / 1;
 }
 
@@ -76,11 +72,10 @@ html, body {
     border-radius: 50%;
 }
 
-/* 針 */
 .pointer {
     position: absolute;
     top: 50%;
-    right: -15px; /* 枠の上に被せる */
+    right: -15px;
     transform: translateY(-50%);
     width: 0;
     height: 0;
@@ -114,18 +109,15 @@ html, body {
 .btn-stop { background-color: #333; color: white; }
 .btn-stop:disabled { background-color: #aaa; cursor: not-allowed; }
 
-/* 5. 管理者パネル (横幅いっぱいに強制) */
+/* 5. 管理者パネル */
 .admin-footer {
     width: 100%;
-    margin-top: auto; /* 下部に押しやる */
+    margin-top: auto;
     background: #f0f0f0;
     border-top: 1px solid #ccc;
 }
 
-details {
-    width: 100%;
-}
-
+details { width: 100%; }
 details summary {
     padding: 15px;
     text-align: center;
@@ -137,13 +129,8 @@ details summary {
     border-bottom: 1px solid #ccc;
 }
 details summary::-webkit-details-marker { display: none; }
+.settings-content { padding: 15px; background: #fafafa; }
 
-.settings-content {
-    padding: 15px;
-    background: #fafafa;
-}
-
-/* リストのリセット (右余白の原因除去) */
 #itemsList {
     list-style: none;
     padding: 0;
@@ -151,12 +138,8 @@ details summary::-webkit-details-marker { display: none; }
     width: 100%;
 }
 
-/* PC用のヘッダーはスマホでは非表示 */
-.settings-grid-header {
-    display: none; 
-}
+.settings-grid-header { display: none; }
 
-/* カード型レイアウト */
 .input-group {
     display: flex;
     flex-direction: column;
@@ -189,24 +172,11 @@ details summary::-webkit-details-marker { display: none; }
 .btn-reset { background: #ff9800; color: white; }
 .btn-save { background: #4CAF50; color: white; margin-bottom: 10px; }
 .input-group .btn-reset { background: #ff5252; margin: 0; }
-
-.admin-buttons {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-/* 説明文 */
-.help-box {
-    background: #e3f2fd;
-    padding: 10px;
-    border-radius: 5px;
-    margin-bottom: 15px;
-    font-size: 0.9rem;
-}
+.admin-buttons { display: flex; flex-direction: column; gap: 10px; }
+.help-box { background: #e3f2fd; padding: 10px; border-radius: 5px; margin-bottom: 15px; font-size: 0.9rem; }
 .help-list { padding-left: 20px; }
 
-/* 6. モーダル (幅調整) */
+/* 6. モーダル (★修正箇所：絶対中央配置) */
 .modal {
     display: none;
     position: fixed;
@@ -218,14 +188,28 @@ details summary::-webkit-details-marker { display: none; }
 }
 .modal-content {
     background: #fff;
-    margin: 40% auto;
+    
+    /* 画面のど真ん中に配置する最強の設定 */
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    
+    /* サイズ設定 */
+    width: 90%;
+    max-width: 400px;
+    
+    /* 横画面で高さが足りない時はスクロールさせる */
+    max-height: 90vh; 
+    overflow-y: auto;
+    
     padding: 25px;
     border: 8px solid #d32f2f;
     border-radius: 20px;
-    width: 90%;          /* 画面幅の90% */
-    max-width: 400px;    /* ただし最大400px */
     text-align: center;
-    position: relative;
+    
+    /* Marginはゼロにする */
+    margin: 0;
 }
 .close {
     position: absolute;
@@ -253,7 +237,6 @@ details summary::-webkit-details-marker { display: none; }
     .settings-grid-header, .input-group {
         gap: 5px; align-items: center;
     }
-    /* 列定義 */
     .mode-normal { grid-template-columns: 40px 2fr 1fr 1fr 2fr 40px; }
     .mode-secret { grid-template-columns: 40px 2fr 1fr 1fr 1fr 2fr 40px; }
 }
