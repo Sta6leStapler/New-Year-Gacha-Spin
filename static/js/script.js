@@ -142,13 +142,13 @@ function drawWheel() {
     
     const centerX = width / 2;
     const centerY = height / 2;
-    // 半径は少し余裕を持たせる
-    const radius = (Math.min(width, height) / 2) * 0.92;
+    
+    // ★修正点：半径をキャンバスいっぱい（フレームギリギリ）まで広げる
+    const radius = (Math.min(width, height) / 2) * 0.98;
 
     const totalWeight = displaySlices.reduce((sum, s) => sum + s.weight, 0);
     if (totalWeight <= 0) return;
 
-    // 前の描画を消す
     ctx.clearRect(0, 0, width, height);
 
     let startAngle = (currentAngle % 360) * Math.PI / 180;
@@ -162,7 +162,7 @@ function drawWheel() {
         ctx.fillStyle = slice.color;
         ctx.fill();
         
-        // 線の太さをサイズに合わせて調整
+        // 境界線の太さ調整
         ctx.lineWidth = Math.max(2, width * 0.005);
         ctx.strokeStyle = "#fff";
         ctx.stroke();
@@ -173,7 +173,7 @@ function drawWheel() {
         ctx.textAlign = "right";
         ctx.fillStyle = "#fff";
         
-        // フォントサイズ動的計算
+        // フォントサイズ
         const fontSize = Math.max(14, radius * 0.12);
         ctx.font = `bold ${fontSize}px 'Yusei Magic', Arial`;
         
@@ -182,6 +182,7 @@ function drawWheel() {
         ctx.shadowOffsetX = 1;
         ctx.shadowOffsetY = 1;
         
+        // 文字位置
         ctx.fillText(slice.name, radius * 0.85, fontSize * 0.35);
         ctx.restore();
 
