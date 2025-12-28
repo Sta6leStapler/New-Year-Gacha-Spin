@@ -133,73 +133,56 @@ details summary::-webkit-details-marker { display: none; }
 
 /* スマホ対応用 */
 @media screen and (max-width: 600px) {
-    /* 1. 全体設定：横揺れ防止 */
     body {
         padding: 0;
         margin: 0;
         overflow-x: hidden;
         width: 100%;
     }
-    
-    /* コンテンツ全体のラッパー */
     .main-wrapper {
-        padding: 10px 0; /* 左右の余白はゼロにする */
+        padding: 10px 0;
         width: 100%;
         display: flex;
         flex-direction: column;
-        align-items: center; /* 子要素を中央揃え */
+        align-items: center;
     }
-
     .jp-title {
         font-size: 1.8rem;
         margin-bottom: 20px;
         width: 100%;
         text-align: center;
     }
-
-    /* 2. ルーレット外枠：画面中央に配置 */
     .roulette-decoration-ring {
-        /* 画面横幅の90% または 高さの50% くらいのサイズ感 */
         width: 90vmin;
         height: 90vmin;
         max-width: 340px;
         max-height: 340px;
-        
-        /* 中央揃え */
         margin: 0 auto 20px auto; 
-        
-        border-width: 5px; /* 枠線を少し太くして「フレーム感」を出す */
+        border-width: 5px;
         box-sizing: border-box;
         aspect-ratio: 1 / 1;
-        
         display: flex;
         align-items: center;
         justify-content: center;
-        position: relative; /* 針の基準点 */
+        position: relative;
     }
-
     .roulette-container {
         width: 100%;
         height: 100%;
         position: relative;
     }
-    
     #rouletteCanvas {
         width: 100% !important;
         height: 100% !important;
         display: block;
     }
-    
-    /* 針の位置調整：フレームの右端にピッタリ合わせる */
     .pointer {
         border-width: 12px 20px 12px 0;
-        right: -12px; /* 枠線の上に重なるように調整 */
+        right: -12px;
         top: 50%;
         transform: translateY(-50%);
         z-index: 20;
     }
-    
-    /* ボタンエリア */
     .controls {
         width: 100%;
         text-align: center;
@@ -209,8 +192,6 @@ details summary::-webkit-details-marker { display: none; }
         padding: 12px 30px;
         font-size: 1.1rem;
     }
-
-    /* 3. 設定パネル：画面幅いっぱいに */
     .admin-footer {
         width: 100%;
         padding: 0;
@@ -218,8 +199,6 @@ details summary::-webkit-details-marker { display: none; }
         border: none;
         background: #f9f9f9;
     }
-
-    /* 開閉バー */
     details summary {
         padding: 15px;
         background-color: #eee;
@@ -228,29 +207,24 @@ details summary::-webkit-details-marker { display: none; }
         text-align: center;
         font-weight: bold;
     }
-
     .settings-content {
         width: 100%;
         padding: 15px;
         box-sizing: border-box;
     }
-    
-    /* ★重要：リストのデフォルト余白を消す（右の余白の原因） */
+    /* ★最重要：リストの余白削除★ */
     #itemsList {
         padding-left: 0;
         margin: 0;
         list-style: none;
         width: 100%;
     }
-
     .settings-grid-header { display: none !important; }
-
-    /* 入力カード */
     .input-group {
         display: flex !important;
         flex-direction: column;
-        width: 100%; /* 横幅いっぱい */
-        box-sizing: border-box; /* パディングを含める */
+        width: 100%;
+        box-sizing: border-box;
         background: #fff;
         border: 1px solid #ddd;
         border-radius: 8px;
@@ -259,7 +233,6 @@ details summary::-webkit-details-marker { display: none; }
         gap: 10px;
         box-shadow: 0 2px 4px rgba(0,0,0,0.05);
     }
-    
     .input-group input {
         font-size: 1rem;
         padding: 10px;
@@ -268,7 +241,6 @@ details summary::-webkit-details-marker { display: none; }
         width: 100%;
         box-sizing: border-box;
     }
-
     .input-group button {
         width: 100%;
         padding: 12px;
@@ -278,7 +250,6 @@ details summary::-webkit-details-marker { display: none; }
         margin-top: 5px;
         border-radius: 4px;
     }
-    
     .admin-buttons {
         display: flex;
         flex-direction: column;
@@ -291,6 +262,5 @@ details summary::-webkit-details-marker { display: none; }
         font-size: 1rem;
         margin: 0;
     }
-    
     .modal-content { width: 90%; margin: 40% auto; padding: 25px; }
 }
