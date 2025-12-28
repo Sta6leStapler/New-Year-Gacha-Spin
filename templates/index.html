@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>お年玉ルーレット</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Yusei+Magic&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <div class="main-wrapper">
+        <header>
+            <h1 class="jp-title">お年玉<br>運命のルーレット</h1>
+            </header>
+
+        <div class="roulette-decoration-ring">
+            <div class="roulette-container">
+                <div class="pointer"></div>
+                <canvas id="rouletteCanvas" width="340" height="340"></canvas>
+            </div>
+        </div>
+
+        <div class="layout-controls" style="display:none;"> 
+             </div>
+
+        <div class="controls">
+            <button id="spinBtn" class="btn-jp btn-start">回す</button>
+            <button id="stopBtn" class="btn-jp btn-stop" disabled>止める</button>
+        </div>
+
+        <div id="resultModal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2 id="resultTitle">おめでとう！</h2>
+                <div class="result-decoration">
+                    <p id="resultText" class="result-amount">---</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="admin-footer">
+        <details class="settings-panel">
+            <summary>⚙️ 管理者設定を開く</summary>
+            <div class="settings-content">
+                <h3>項目の設定</h3>
+                
+                <div class="help-box">
+                    <p><strong>【設定のヒント】</strong></p>
+                    <ul class="help-list" id="helpList">
+                        <li><strong>分割:</strong> 1つの項目を何ヶ所に配置するか決めます（例：2にすると2箇所に現れます）。</li>
+                        <li><strong>見た目の大きさ:</strong> 「見た目」の数値 ÷ 「分割」の数値 が、1スライスあたりの大きさになります。</li>
+                        <li><span style="color:#d32f2f;">★「見た目」と「分割」を同じ数値に設定すると、すべてのスライスの大きさが均一になります。</span></li>
+                        </ul>
+                </div>
+
+                <div class="layout-actions">
+                    <span>配置変更: </span>
+                    <button id="btnShuffleAdmin" class="btn-small btn-option">ランダム配置</button>
+                    <button id="btnDistributeAdmin" class="btn-small btn-option">なるべく等間隔に配置</button>
+                </div>
+                
+                <div id="settingsHeader" class="settings-grid-header">
+                    </div>
+
+                <ul id="itemsList">
+                    </ul>
+                
+                <div class="admin-buttons">
+                    <button id="addItemBtn" class="btn-small">+ 項目追加</button>
+                    <button id="saveSettingsBtn" class="btn-small btn-save">保存して反映</button>
+                    <button id="resetSettingsBtn" class="btn-small btn-reset">初期化</button>
+                </div>
+            </div>
+        </details>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>
