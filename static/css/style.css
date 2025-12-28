@@ -134,83 +134,132 @@ details summary::-webkit-details-marker { display: none; }
 /* スマホ対応用 */
 
 @media screen and (max-width: 600px) {
-    /* 1. 全体の余白調整 */
+    /* 1. 全体の余白とスクロール防止 */
     body {
         padding: 0;
+        overflow-x: hidden; /* 横スクロールを防止 */
     }
     .main-wrapper {
-        padding: 10px;
+        padding: 15px 10px; /* 上下左右の余白を少し調整 */
+        width: 100%;
+        box-sizing: border-box; /* パディングを幅に含める */
     }
     .jp-title {
-        font-size: 1.8rem; /* タイトルを少し小さく */
-        margin-bottom: 15px;
+        font-size: 1.8rem;
+        margin-bottom: 20px;
     }
 
-    /* 2. ルーレットのサイズ調整（スマホ用に縮小） */
+    /* 2. ルーレットのサイズ調整（画面に合わせて伸縮させる） */
     .roulette-decoration-ring {
-        width: 300px;
-        height: 300px;
+        /* 固定幅をやめ、画面幅の90%を使う。ただし最大340pxまで。 */
+        width: 90vw;
+        height: 90vw;
+        max-width: 340px;
+        max-height: 340px;
         border-width: 3px;
+        margin-bottom: 20px;
     }
+    /* 中身は親要素に合わせて100%にする */
     .roulette-container {
-        width: 280px;
-        height: 280px;
+        width: 94%;
+        height: 94%;
     }
-    /* CanvasのサイズはJSで再計算させますが、表示サイズはここで指定 */
     #rouletteCanvas {
-        width: 280px;
-        height: 280px;
+        width: 100%;
+        height: 100%;
     }
     
     /* 針の位置微調整 */
     .pointer {
-        border-width: 10px 18px 10px 0; /* 少し小さく */
-        right: -8px;
+        border-width: 10px 18px 10px 0;
+        right: -9px;
+    }
+    
+    /* ボタンのサイズ調整 */
+    .controls button {
+        padding: 10px 30px;
+        font-size: 1.2rem;
     }
 
-    /* 3. 設定パネルのスマホ最適化（カード型レイアウトに変更） */
+    /* 3. 設定パネルのスマホ最適化（画面横いっぱいに広げる） */
     
-    /* ヘッダー（「名前」「色」などの文字）を隠す */
+    /* フッターの余白をなくす */
+    .admin-footer {
+        padding: 0;
+        border-top: none;
+    }
+
+    /* 開閉ボタンを見やすく */
+    details summary {
+        padding: 15px;
+        background-color: #f0f0f0;
+        border-bottom: 1px solid #ddd;
+        font-size: 0.9rem;
+    }
+
+    /* コンテンツ領域を横幅いっぱいにする */
+    .settings-content {
+        width: 100%;
+        margin: 0;
+        border-radius: 0;
+        padding: 15px;
+        box-sizing: border-box; /* パディングを幅に含める */
+        background-color: #fafafa;
+    }
+
+    /* ヘッダー（「名前」「色」など）を隠す */
     .settings-grid-header {
         display: none !important;
     }
 
-    /* 1行をカードのようなブロックにする */
+    /* 1行をカード型のレイアウトに変更 */
     .input-group {
         display: flex !important;
         flex-direction: column; /* 縦並び */
         background: #fff;
-        border: 2px solid #ddd;
+        border: 1px solid #ddd;
         border-radius: 8px;
         padding: 15px;
         margin-bottom: 15px;
-        gap: 10px;
+        gap: 12px; /* 各入力欄の間隔 */
         box-shadow: 0 2px 5px rgba(0,0,0,0.05);
     }
     
-    /* 各入力欄を見やすく */
+    /* 各入力欄を見やすく大きく */
     .input-group input {
-        font-size: 1rem; /* 文字サイズを大きく */
-        padding: 8px;
+        font-size: 1rem;
+        padding: 10px;
+        border: 1px solid #ccc;
     }
 
-    /* 何の入力欄かわかるようにラベルを擬似的に追加 */
-    .input-group input[name="itemName"]::before { content: "名前: "; } /* inputには効かないがレイアウト調整 */
-    
-    /* 削除ボタンを大きく */
+    /* 削除ボタンを大きく目立たせる */
     .input-group button {
         width: 100%;
-        padding: 10px;
+        padding: 12px;
         font-size: 1rem;
         background-color: #ff5252;
         color: white;
         margin-top: 5px;
+        border-radius: 5px;
+    }
+    
+    /* 管理者ボタンエリアも縦並びで見やすく */
+    .admin-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+    .admin-buttons button {
+        width: 100%;
+        padding: 12px;
+        font-size: 1rem;
+        margin: 0;
     }
 
     /* モーダルの調整 */
     .modal-content {
-        width: 90%;
+        width: 92%;
         margin: 40% auto;
-        padding: 20px;
+        padding: 25px;
     }
 }
