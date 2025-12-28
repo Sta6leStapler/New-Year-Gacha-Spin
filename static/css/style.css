@@ -130,3 +130,87 @@ details summary::-webkit-details-marker { display: none; }
 .btn-save { background: #4CAF50; color: white; }
 .btn-reset { background: #ff9800; color: white; }
 .btn-option { background: #2196F3; color: white; }
+
+/* スマホ対応用 */
+
+@media screen and (max-width: 600px) {
+    /* 1. 全体の余白調整 */
+    body {
+        padding: 0;
+    }
+    .main-wrapper {
+        padding: 10px;
+    }
+    .jp-title {
+        font-size: 1.8rem; /* タイトルを少し小さく */
+        margin-bottom: 15px;
+    }
+
+    /* 2. ルーレットのサイズ調整（スマホ用に縮小） */
+    .roulette-decoration-ring {
+        width: 300px;
+        height: 300px;
+        border-width: 3px;
+    }
+    .roulette-container {
+        width: 280px;
+        height: 280px;
+    }
+    /* CanvasのサイズはJSで再計算させますが、表示サイズはここで指定 */
+    #rouletteCanvas {
+        width: 280px;
+        height: 280px;
+    }
+    
+    /* 針の位置微調整 */
+    .pointer {
+        border-width: 10px 18px 10px 0; /* 少し小さく */
+        right: -8px;
+    }
+
+    /* 3. 設定パネルのスマホ最適化（カード型レイアウトに変更） */
+    
+    /* ヘッダー（「名前」「色」などの文字）を隠す */
+    .settings-grid-header {
+        display: none !important;
+    }
+
+    /* 1行をカードのようなブロックにする */
+    .input-group {
+        display: flex !important;
+        flex-direction: column; /* 縦並び */
+        background: #fff;
+        border: 2px solid #ddd;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 15px;
+        gap: 10px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+    
+    /* 各入力欄を見やすく */
+    .input-group input {
+        font-size: 1rem; /* 文字サイズを大きく */
+        padding: 8px;
+    }
+
+    /* 何の入力欄かわかるようにラベルを擬似的に追加 */
+    .input-group input[name="itemName"]::before { content: "名前: "; } /* inputには効かないがレイアウト調整 */
+    
+    /* 削除ボタンを大きく */
+    .input-group button {
+        width: 100%;
+        padding: 10px;
+        font-size: 1rem;
+        background-color: #ff5252;
+        color: white;
+        margin-top: 5px;
+    }
+
+    /* モーダルの調整 */
+    .modal-content {
+        width: 90%;
+        margin: 40% auto;
+        padding: 20px;
+    }
+}

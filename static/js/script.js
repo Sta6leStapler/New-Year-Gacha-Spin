@@ -33,18 +33,11 @@ window.onload = () => {
     if (!canvas) return;
     ctx = canvas.getContext('2d');
     
-    const dpr = window.devicePixelRatio || 1;
-    const rect = canvas.getBoundingClientRect();
-    canvas.width = rect.width * dpr;
-    canvas.height = rect.height * dpr;
-    ctx.scale(dpr, dpr);
+    // ■■■ 変更点：サイズ調整ロジックを関数化して呼び出し ■■■
+    handleResize();
+    window.addEventListener('resize', handleResize); // 画面回転時などに対応
 
-    // --- ここを変更 ---
-    // 裏モードのヒント表示制御
     if (isSecretMode) {
-        // mode-indicatorの表示処理は削除しました
-        
-        // ヒントに裏確率の説明を追加
         const helpList = document.getElementById('helpList');
         if (helpList) {
             const li = document.createElement('li');
@@ -77,7 +70,28 @@ window.onload = () => {
     loadAudioFiles();
 };
 
-// --- 以下、ロジック部分は変更なし ---
+// ■■■ 新規追加：レスポンシブ対応関数 ■■■
+function handleResize() {
+    if (!canvas || !ctx) return;
+    
+    // CSSで設定された表示サイズを取得
+    // (スマホなら280px, PCなら340pxになっているはず)
+    const rect = canvas.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+    
+    // 内部解像度を更新
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
+    
+    // スケール調整
+    ctx.resetTransform(); // 一度リセット
+    ctx.scale(dpr, dpr);
+    
+    drawWheel(); // 再描画
+}
+
+// --- 以下、ロジック変更なし ---
+
 function changeLayout(mode) {
     layoutMode = mode;
     generateDisplaySlices();
@@ -129,8 +143,11 @@ function generateDisplaySlices() {
 
 function drawWheel() {
     if (!canvas || !ctx) return;
-    const width = canvas.width / (window.devicePixelRatio || 1);
-    const height = canvas.height / (window.devicePixelRatio || 1);
+    // CSS上の表示サイズを取得
+    const rect = canvas.getBoundingClientRect();
+    const width = rect.width;
+    const height = rect.height;
+    
     const centerX = width / 2;
     const centerY = height / 2;
     const radius = width / 2 - 15;
@@ -158,7 +175,8 @@ function drawWheel() {
         ctx.rotate(startAngle + sliceAngle / 2);
         ctx.textAlign = "right";
         ctx.fillStyle = "#fff";
-        ctx.font = "bold 18px 'Yusei Magic', Arial";
+        // 文字サイズも少し調整（スマホだと小さくなりすぎないように16px程度で固定でもOK）
+        ctx.font = "bold 16px 'Yusei Magic', Arial";
         ctx.shadowColor = "rgba(0,0,0,0.5)";
         ctx.shadowBlur = 4;
         ctx.shadowOffsetX = 1;
@@ -180,14 +198,11 @@ function drawWheel() {
 
 function startSpin() {
     if (isSpinning) return;
-    
     initAudio();
     playDrum();
-
     isSpinning = true;
     document.getElementById('spinBtn').disabled = true;
     document.getElementById('stopBtn').disabled = false;
-
     if (animationFrameId) cancelAnimationFrame(animationFrameId);
 
     function spinLoop() {
@@ -204,19 +219,15 @@ function startSpin() {
 
 async function stopSpin() {
     document.getElementById('stopBtn').disabled = true;
-
     try {
         const response = await fetch('/api/spin', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({ items: items, is_secret: isSecretMode })
         });
-        
         if (!response.ok) throw new Error("API Error");
         const result = await response.json();
-        
         startDeceleration(result.winner_index);
-
     } catch (e) {
         console.error(e);
         alert("通信エラーが発生しました");
@@ -226,11 +237,9 @@ async function stopSpin() {
 
 function startDeceleration(winnerOriginalIndex) {
     if (animationFrameId) cancelAnimationFrame(animationFrameId);
-
     const candidates = [];
     const totalWeight = displaySlices.reduce((sum, s) => sum + s.weight, 0);
     let angleAccumulator = 0;
-
     displaySlices.forEach(slice => {
         const sliceAngleDeg = (slice.weight / totalWeight) * 360;
         if (slice.originalIndex === winnerOriginalIndex) {
@@ -238,23 +247,18 @@ function startDeceleration(winnerOriginalIndex) {
         }
         angleAccumulator += sliceAngleDeg;
     });
-
     if (candidates.length === 0) {
         finishSpin(null);
         return;
     }
-
     const targetCenterRelative = candidates[Math.floor(Math.random() * candidates.length)];
     const currentMod = currentAngle % 360;
     const goalMod = (360 - targetCenterRelative) % 360;
-    
     let angleToGoal = goalMod - currentMod;
     if (angleToGoal <= 0) angleToGoal += 360;
-    
     const totalRotation = angleToGoal + (360 * MIN_ROTATIONS);
     const startAngleForAnim = currentAngle;
     const finalAngle = startAngleForAnim + totalRotation;
-
     const startTime = performance.now();
 
     function decelerateLoop(time) {
@@ -284,7 +288,6 @@ function finishSpin(winnerItem) {
     stopDrum();
     document.getElementById('spinBtn').disabled = false;
     document.getElementById('stopBtn').disabled = true;
-
     if (winnerItem) {
         playFanfare();
         setTimeout(() => { showResult(winnerItem); }, 500);
@@ -311,13 +314,11 @@ function getRandomColor() {
 function loadSettings() {
     const saved = localStorage.getItem('gachaSettings');
     items = saved ? JSON.parse(saved) : JSON.parse(JSON.stringify(defaultItems));
-    
     items.forEach(item => {
         if (!item.split_count) item.split_count = 1;
         if (!item.message) item.message = "おめでとう！";
         if (item.real_weight === undefined) item.real_weight = item.visual_weight;
     });
-
     generateDisplaySlices();
     renderSettingsUI();
     drawWheel();
@@ -329,16 +330,13 @@ function saveSettings() {
 
 function renderSettingsUI() {
     const header = document.getElementById('settingsHeader');
-    
     let headerHtml = `<span>色</span><span>名前(金額)</span><span>見た目</span>`;
-    
     if (isSecretMode) {
         headerHtml += `<span>裏確率</span>`;
         header.className = 'settings-grid-header mode-secret';
     } else {
         header.className = 'settings-grid-header mode-normal';
     }
-    
     headerHtml += `<span>分割</span><span>メッセージ</span><span>削除</span>`;
     header.innerHTML = headerHtml;
 
@@ -359,22 +357,23 @@ function addSettingRow(item = null, index = null) {
     const msg = item ? item.message : "おめでとう！";
     const color = item ? item.color : getRandomColor();
 
+    // 入力欄にplaceholderを追加して、スマホでのカード表示時にわかりやすくします
     let html = `
         <input type="color" name="color" value="${color}">
-        <input type="text" name="itemName" value="${nameVal}">
-        <input type="number" name="visualWeight" value="${vWeight}" min="1">
+        <input type="text" name="itemName" value="${nameVal}" placeholder="項目名">
+        <input type="number" name="visualWeight" value="${vWeight}" min="1" placeholder="見た目">
     `;
 
     if (isSecretMode) {
-        html += `<input type="number" name="realWeight" value="${rWeight}" min="1" style="background:#ffebee;">`;
+        html += `<input type="number" name="realWeight" value="${rWeight}" min="1" style="background:#ffebee;" placeholder="裏確率">`;
     } else {
         html += `<input type="hidden" name="realWeight" value="${rWeight}">`;
     }
 
     html += `
-        <input type="number" name="splitCount" value="${sCount}" min="1">
-        <input type="text" name="message" value="${msg}">
-        <button onclick="this.parentElement.remove()" class="btn-small btn-reset" style="margin:0; padding:5px;">×</button>
+        <input type="number" name="splitCount" value="${sCount}" min="1" placeholder="分割数">
+        <input type="text" name="message" value="${msg}" placeholder="当選メッセージ">
+        <button onclick="this.parentElement.remove()" class="btn-small btn-reset" style="margin:0; padding:5px;">この項目を削除</button>
     `;
 
     li.innerHTML = html;
@@ -398,7 +397,6 @@ function saveSettingsFromUI() {
     });
 
     if (newItems.length === 0) { alert("項目を1つ以上設定してください"); return; }
-    
     items = newItems;
     saveSettings();
     generateDisplaySlices();
