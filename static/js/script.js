@@ -1,4 +1,3 @@
-// --- 初期設定データ ---
 const defaultItems = [
     { name: "500円", color: "#aed581", visual_weight: 5, real_weight: 5, split_count: 5, message: "おめでとう！" },
     { name: "1000円", color: "#4fc3f7", visual_weight: 4, real_weight: 4, split_count: 4, message: "やったね！" },
@@ -12,13 +11,13 @@ const DECEL_DURATION = 5000;
 const MIN_ROTATIONS = 4;
 
 let items = [];
-let displaySlices = []; 
+let displaySlices = [];
 let canvas, ctx;
-let currentAngle = 0; 
+let currentAngle = 0;
 let isSpinning = false;
 let animationFrameId;
 
-let layoutMode = 'random'; 
+let layoutMode = 'random';
 
 let audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 let drumBuffer = null;
@@ -32,10 +31,13 @@ window.onload = () => {
     canvas = document.getElementById('rouletteCanvas');
     if (!canvas) return;
     ctx = canvas.getContext('2d');
-    
-    // リサイズ監視
+
+    // リサイズ監視（縦横切り替え対応）
     handleResize();
     window.addEventListener('resize', handleResize);
+    window.addEventListener('orientationchange', () => {
+        setTimeout(handleResize, 100); // 回転完了を少し待つ
+    });
 
     if (isSecretMode) {
         const helpList = document.getElementById('helpList');
@@ -63,21 +65,24 @@ window.onload = () => {
             drawWheel();
         }
     };
-    
-    document.getElementById('btnShuffleAdmin').onclick = () => changeLayout('random');
-    document.getElementById('btnDistributeAdmin').onclick = () => changeLayout('distributed');
+
+    const btnShuffle = document.getElementById('btnShuffleAdmin');
+    if(btnShuffle) btnShuffle.onclick = () => changeLayout('random');
+    const btnDist = document.getElementById('btnDistributeAdmin');
+    if(btnDist) btnDist.onclick = () => changeLayout('distributed');
 
     loadAudioFiles();
 };
 
-// --- 親要素基準のリサイズ処理 ---
 function handleResize() {
     if (!canvas || !ctx) return;
     
+    // 親要素(.roulette-container)のサイズに合わせる
     const parent = canvas.parentElement;
     const rect = parent.getBoundingClientRect();
     const dpr = window.devicePixelRatio || 1;
     
+    // 内部解像度を更新
     canvas.width = rect.width * dpr;
     canvas.height = rect.height * dpr;
     
@@ -92,12 +97,10 @@ function changeLayout(mode) {
 
 function generateDisplaySlices() {
     displaySlices = [];
-    
     let pool = [];
     items.forEach((item, index) => {
         const count = parseInt(item.split_count) || 1;
         const weightPerSlice = parseFloat(item.visual_weight) / count;
-        
         for (let i = 0; i < count; i++) {
             pool.push({
                 originalIndex: index,
@@ -119,10 +122,8 @@ function generateDisplaySlices() {
         pool.forEach(slice => {
             buckets[slice.originalIndex].push(slice);
         });
-        
         displaySlices = [];
         let maxLen = Math.max(...buckets.map(b => b.length));
-        
         for (let i = 0; i < maxLen; i++) {
             for (let b = 0; b < buckets.length; b++) {
                 if (buckets[b].length > i) {
@@ -133,17 +134,15 @@ function generateDisplaySlices() {
     }
 }
 
-// --- 描画処理 (現在解像度に合わせて描画) ---
 function drawWheel() {
     if (!canvas || !ctx) return;
     
     const width = canvas.width;
     const height = canvas.height;
-    
     const centerX = width / 2;
     const centerY = height / 2;
     
-    // ★係数を 0.95 に変更（枠線とのバランス調整）
+    // 半径：枠線(border)の内側に収めるため、少し小さく(0.95倍)する
     const radius = (Math.min(width, height) / 2) * 0.95;
 
     const totalWeight = displaySlices.reduce((sum, s) => sum + s.weight, 0);
@@ -162,7 +161,7 @@ function drawWheel() {
         ctx.fillStyle = slice.color;
         ctx.fill();
         
-        // 境界線の太さ調整
+        // 境界線
         ctx.lineWidth = Math.max(2, width * 0.005);
         ctx.strokeStyle = "#fff";
         ctx.stroke();
@@ -176,13 +175,10 @@ function drawWheel() {
         // フォントサイズ
         const fontSize = Math.max(14, radius * 0.12);
         ctx.font = `bold ${fontSize}px 'Yusei Magic', Arial`;
-        
         ctx.shadowColor = "rgba(0,0,0,0.5)";
         ctx.shadowBlur = 4;
         ctx.shadowOffsetX = 1;
         ctx.shadowOffsetY = 1;
-        
-        // 文字位置
         ctx.fillText(slice.name, radius * 0.85, fontSize * 0.35);
         ctx.restore();
 
@@ -266,21 +262,16 @@ function startDeceleration(winnerOriginalIndex) {
     const startTime = performance.now();
 
     function decelerateLoop(time) {
-        try {
-            const elapsed = time - startTime;
-            if (elapsed < DECEL_DURATION) {
-                let t = elapsed / DECEL_DURATION;
-                const ease = (--t)*t*t+1; 
-                currentAngle = startAngleForAnim + (totalRotation * ease);
-                drawWheel();
-                animationFrameId = requestAnimationFrame(decelerateLoop);
-            } else {
-                currentAngle = finalAngle;
-                drawWheel();
-                finishSpin(items[winnerOriginalIndex]);
-            }
-        } catch (e) {
-            console.error(e);
+        const elapsed = time - startTime;
+        if (elapsed < DECEL_DURATION) {
+            let t = elapsed / DECEL_DURATION;
+            const ease = (--t)*t*t+1; 
+            currentAngle = startAngleForAnim + (totalRotation * ease);
+            drawWheel();
+            animationFrameId = requestAnimationFrame(decelerateLoop);
+        } else {
+            currentAngle = finalAngle;
+            drawWheel();
             finishSpin(items[winnerOriginalIndex]);
         }
     }
@@ -387,7 +378,6 @@ function saveSettingsFromUI() {
     const list = document.getElementById('itemsList');
     const rows = list.querySelectorAll('li');
     const newItems = [];
-    
     rows.forEach(row => {
         newItems.push({
             name: row.querySelector('input[name="itemName"]').value,
@@ -398,7 +388,6 @@ function saveSettingsFromUI() {
             message: row.querySelector('input[name="message"]').value
         });
     });
-
     if (newItems.length === 0) { alert("項目を1つ以上設定してください"); return; }
     items = newItems;
     saveSettings();
