@@ -41,8 +41,8 @@ html, body {
 .roulette-decoration-ring {
     width: 95vmin;
     height: 95vmin;
-    max-width: 500px;
-    max-height: 500px;
+    max-width: 640px;
+    max-height: 640px;
     
     margin: 0 auto 30px auto;
     
