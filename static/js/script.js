@@ -143,8 +143,8 @@ function drawWheel() {
     const centerX = width / 2;
     const centerY = height / 2;
     
-    // ★修正点：半径をキャンバスいっぱい（フレームギリギリ）まで広げる
-    const radius = (Math.min(width, height) / 2) * 0.98;
+    // ★係数を 0.95 に変更（枠線とのバランス調整）
+    const radius = (Math.min(width, height) / 2) * 0.95;
 
     const totalWeight = displaySlices.reduce((sum, s) => sum + s.weight, 0);
     if (totalWeight <= 0) return;
