@@ -8,7 +8,6 @@ const defaultItems = [
 ];
 
 // --- グローバル変数 ---
-const LOGICAL_SIZE = 340; // 内部的な描画基準サイズ（固定）
 const SPIN_SPEED = 10;
 const DECEL_DURATION = 5000;
 const MIN_ROTATIONS = 4;
@@ -79,23 +78,19 @@ window.onload = () => {
 function handleResize() {
     if (!canvas || !ctx) return;
     
-    // 1. CSSで決まった現在の表示サイズを取得（例: スマホなら280pxなど）
+    // 現在の表示サイズ（CSSで決まったpx値）を取得
     const rect = canvas.getBoundingClientRect();
     const dpr = window.devicePixelRatio || 1;
     
-    // 2. 内部解像度は「表示サイズ × 画素密度」にする（綺麗に表示するため）
+    // キャンバスの内部解像度をセット（描画バッファのサイズ変更）
     canvas.width = rect.width * dpr;
     canvas.height = rect.height * dpr;
     
-    // 3. コンテキストのスケール調整
-    // 「論理サイズ(340)」を「実際のピクセル数」に引き伸ばす倍率を計算
-    const scale = (rect.width * dpr) / LOGICAL_SIZE;
+    // ※ ctx.scale は使いません。drawWheel側で座標計算します。
     
-    ctx.resetTransform();
-    ctx.scale(scale, scale);
-    
+    // サイズ変更直後に再描画
     drawWheel();
-}   
+}
 
 function changeLayout(mode) {
     layoutMode = mode;
@@ -148,18 +143,24 @@ function generateDisplaySlices() {
 
 function drawWheel() {
     if (!canvas || !ctx) return;
-
-    // ★ここが重要★
-    // 画面サイズに関わらず、常に「340px × 340px」の空間だとして計算する
-    const width = LOGICAL_SIZE;
-    const height = LOGICAL_SIZE;
     
+    // 現在のキャンバスの実サイズを取得
+    const width = canvas.width;
+    const height = canvas.height;
+    
+    // 中心点と半径を動的に計算
     const centerX = width / 2;
     const centerY = height / 2;
-    const radius = width / 2 - 15; // 余白
+    
+    // 半径は「幅か高さの小さい方」の半分。少し余白(15px相当)を持たせる
+    // 比率で計算：(サイズ / 2) * 0.9 くらいにする
+    const radius = (Math.min(width, height) / 2) * 0.92;
 
     const totalWeight = displaySlices.reduce((sum, s) => sum + s.weight, 0);
     if (totalWeight <= 0) return;
+
+    // 描画エリアをクリア（重要：サイズ変更時のゴミ残り防止）
+    ctx.clearRect(0, 0, width, height);
 
     let startAngle = (currentAngle % 360) * Math.PI / 180;
 
@@ -172,7 +173,7 @@ function drawWheel() {
         ctx.fillStyle = slice.color;
         ctx.fill();
         
-        ctx.lineWidth = 2;
+        ctx.lineWidth = width * 0.005; // 線の太さもサイズに合わせて微調整（約2px〜）
         ctx.strokeStyle = "#fff";
         ctx.stroke();
 
@@ -181,13 +182,18 @@ function drawWheel() {
         ctx.rotate(startAngle + sliceAngle / 2);
         ctx.textAlign = "right";
         ctx.fillStyle = "#fff";
-        // フォントサイズも固定値でOK（自動的にスケールされるため）
-        ctx.font = "bold 18px 'Yusei Magic', Arial";
+        
+        // フォントサイズも動的に計算 (半径の10%くらい)
+        const fontSize = Math.max(14, radius * 0.12);
+        ctx.font = `bold ${fontSize}px 'Yusei Magic', Arial`;
+        
         ctx.shadowColor = "rgba(0,0,0,0.5)";
         ctx.shadowBlur = 4;
         ctx.shadowOffsetX = 1;
         ctx.shadowOffsetY = 1;
-        ctx.fillText(slice.name, radius - 20, 6);
+        
+        // 文字配置位置（半径より少し内側）
+        ctx.fillText(slice.name, radius * 0.85, fontSize * 0.35);
         ctx.restore();
 
         startAngle += sliceAngle;
@@ -195,10 +201,12 @@ function drawWheel() {
     
     // 中央ピン
     ctx.beginPath();
-    ctx.arc(centerX, centerY, 15, 0, 2 * Math.PI);
+    // ピンのサイズも少し動的に
+    const pinRadius = Math.max(10, radius * 0.08);
+    ctx.arc(centerX, centerY, pinRadius, 0, 2 * Math.PI);
     ctx.fillStyle = "#fff";
     ctx.fill();
-    ctx.lineWidth = 4;
+    ctx.lineWidth = pinRadius * 0.3;
     ctx.strokeStyle = "#d32f2f";
     ctx.stroke();
 }
