@@ -7,6 +7,8 @@ const defaultItems = [
     { name: "1万円", color: "#e57373", visual_weight: 1, real_weight: 1, split_count: 1, message: "神引き！！" }
 ];
 
+// --- グローバル変数 ---
+const LOGICAL_SIZE = 340; // 内部的な描画基準サイズ（固定）
 const SPIN_SPEED = 10;
 const DECEL_DURATION = 5000;
 const MIN_ROTATIONS = 4;
@@ -73,27 +75,27 @@ window.onload = () => {
     loadAudioFiles();
 };
 
-// ■■■ 新規追加：レスポンシブ対応関数 ■■■
+// リサイズ処理
 function handleResize() {
     if (!canvas || !ctx) return;
     
-    // CSSで設定された表示サイズを取得
-    // (スマホなら280px, PCなら340pxになっているはず)
+    // 1. CSSで決まった現在の表示サイズを取得（例: スマホなら280pxなど）
     const rect = canvas.getBoundingClientRect();
     const dpr = window.devicePixelRatio || 1;
     
-    // 内部解像度を更新
+    // 2. 内部解像度は「表示サイズ × 画素密度」にする（綺麗に表示するため）
     canvas.width = rect.width * dpr;
     canvas.height = rect.height * dpr;
     
-    // スケール調整
-    ctx.resetTransform(); // 一度リセット
-    ctx.scale(dpr, dpr);
+    // 3. コンテキストのスケール調整
+    // 「論理サイズ(340)」を「実際のピクセル数」に引き伸ばす倍率を計算
+    const scale = (rect.width * dpr) / LOGICAL_SIZE;
     
-    drawWheel(); // 再描画
-}
-
-// --- 以下、ロジック変更なし ---
+    ctx.resetTransform();
+    ctx.scale(scale, scale);
+    
+    drawWheel();
+}   
 
 function changeLayout(mode) {
     layoutMode = mode;
@@ -146,14 +148,15 @@ function generateDisplaySlices() {
 
 function drawWheel() {
     if (!canvas || !ctx) return;
-    // CSS上の表示サイズを取得
-    const rect = canvas.getBoundingClientRect();
-    const width = rect.width;
-    const height = rect.height;
+
+    // ★ここが重要★
+    // 画面サイズに関わらず、常に「340px × 340px」の空間だとして計算する
+    const width = LOGICAL_SIZE;
+    const height = LOGICAL_SIZE;
     
     const centerX = width / 2;
     const centerY = height / 2;
-    const radius = width / 2 - 15;
+    const radius = width / 2 - 15; // 余白
 
     const totalWeight = displaySlices.reduce((sum, s) => sum + s.weight, 0);
     if (totalWeight <= 0) return;
@@ -178,8 +181,8 @@ function drawWheel() {
         ctx.rotate(startAngle + sliceAngle / 2);
         ctx.textAlign = "right";
         ctx.fillStyle = "#fff";
-        // 文字サイズも少し調整（スマホだと小さくなりすぎないように16px程度で固定でもOK）
-        ctx.font = "bold 16px 'Yusei Magic', Arial";
+        // フォントサイズも固定値でOK（自動的にスケールされるため）
+        ctx.font = "bold 18px 'Yusei Magic', Arial";
         ctx.shadowColor = "rgba(0,0,0,0.5)";
         ctx.shadowBlur = 4;
         ctx.shadowOffsetX = 1;
@@ -190,6 +193,7 @@ function drawWheel() {
         startAngle += sliceAngle;
     });
     
+    // 中央ピン
     ctx.beginPath();
     ctx.arc(centerX, centerY, 15, 0, 2 * Math.PI);
     ctx.fillStyle = "#fff";
