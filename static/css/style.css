@@ -39,10 +39,10 @@ html, body {
 
 /* 3. ルーレット外枠 */
 .roulette-decoration-ring {
-    width: 90vmin;
-    height: 90vmin;
-    max-width: 340px;
-    max-height: 340px;
+    width: 95vmin;
+    height: 95vmin;
+    max-width: 500px;
+    max-height: 500px;
     
     margin: 0 auto 30px auto;
     
