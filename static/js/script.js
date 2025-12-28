@@ -33,9 +33,12 @@ window.onload = () => {
     if (!canvas) return;
     ctx = canvas.getContext('2d');
     
-    // ■■■ 変更点：サイズ調整ロジックを関数化して呼び出し ■■■
+    // ロード時とリサイズ時にサイズ調整を実行
     handleResize();
-    window.addEventListener('resize', handleResize); // 画面回転時などに対応
+    window.addEventListener('resize', () => {
+        handleResize();
+        drawWheel(); // リサイズ直後に再描画を強制
+    });
 
     if (isSecretMode) {
         const helpList = document.getElementById('helpList');

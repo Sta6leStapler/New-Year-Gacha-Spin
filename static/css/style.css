@@ -151,22 +151,30 @@ details summary::-webkit-details-marker { display: none; }
 
     /* 2. ルーレットのサイズ調整（画面に合わせて伸縮させる） */
     .roulette-decoration-ring {
-        /* 固定幅をやめ、画面幅の90%を使う。ただし最大340pxまで。 */
-        width: 90vw;
-        height: 90vw;
+        /* 横幅は画面の90%、ただし最大340pxまで */
+        width: 90%;
         max-width: 340px;
-        max-height: 340px;
+        /* 高さは自動計算させるが、必ず正方形(1:1)を保つ */
+        aspect-ratio: 1 / 1;
+        height: auto; 
+        
+        margin: 0 auto 20px; /* 中央寄せ */
         border-width: 3px;
-        margin-bottom: 20px;
+        box-sizing: border-box;
     }
-    /* 中身は親要素に合わせて100%にする */
+
     .roulette-container {
-        width: 94%;
-        height: 94%;
+        width: 100%;
+        height: 100%;
+        /* コンテナも正方形を維持 */
+        aspect-ratio: 1 / 1; 
+        position: relative;
     }
+
     #rouletteCanvas {
         width: 100%;
         height: 100%;
+        display: block; /* 余計な隙間防止 */
     }
     
     /* 針の位置微調整 */
