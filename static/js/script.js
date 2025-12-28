@@ -7,7 +7,6 @@ const defaultItems = [
     { name: "1万円", color: "#e57373", visual_weight: 1, real_weight: 1, split_count: 1, message: "神引き！！" }
 ];
 
-// --- グローバル変数 ---
 const SPIN_SPEED = 10;
 const DECEL_DURATION = 5000;
 const MIN_ROTATIONS = 4;
@@ -34,12 +33,9 @@ window.onload = () => {
     if (!canvas) return;
     ctx = canvas.getContext('2d');
     
-    // ロード時とリサイズ時にサイズ調整を実行
+    // リサイズ監視
     handleResize();
-    window.addEventListener('resize', () => {
-        handleResize();
-        drawWheel(); // リサイズ直後に再描画を強制
-    });
+    window.addEventListener('resize', handleResize);
 
     if (isSecretMode) {
         const helpList = document.getElementById('helpList');
@@ -74,21 +70,17 @@ window.onload = () => {
     loadAudioFiles();
 };
 
-// リサイズ処理
+// --- 親要素基準のリサイズ処理 ---
 function handleResize() {
     if (!canvas || !ctx) return;
     
-    // 現在の表示サイズ（CSSで決まったpx値）を取得
-    const rect = canvas.getBoundingClientRect();
+    const parent = canvas.parentElement;
+    const rect = parent.getBoundingClientRect();
     const dpr = window.devicePixelRatio || 1;
     
-    // キャンバスの内部解像度をセット（描画バッファのサイズ変更）
     canvas.width = rect.width * dpr;
     canvas.height = rect.height * dpr;
     
-    // ※ ctx.scale は使いません。drawWheel側で座標計算します。
-    
-    // サイズ変更直後に再描画
     drawWheel();
 }
 
@@ -141,25 +133,22 @@ function generateDisplaySlices() {
     }
 }
 
+// --- 描画処理 (現在解像度に合わせて描画) ---
 function drawWheel() {
     if (!canvas || !ctx) return;
     
-    // 現在のキャンバスの実サイズを取得
     const width = canvas.width;
     const height = canvas.height;
     
-    // 中心点と半径を動的に計算
     const centerX = width / 2;
     const centerY = height / 2;
-    
-    // 半径は「幅か高さの小さい方」の半分。少し余白(15px相当)を持たせる
-    // 比率で計算：(サイズ / 2) * 0.9 くらいにする
+    // 半径は少し余裕を持たせる
     const radius = (Math.min(width, height) / 2) * 0.92;
 
     const totalWeight = displaySlices.reduce((sum, s) => sum + s.weight, 0);
     if (totalWeight <= 0) return;
 
-    // 描画エリアをクリア（重要：サイズ変更時のゴミ残り防止）
+    // 前の描画を消す
     ctx.clearRect(0, 0, width, height);
 
     let startAngle = (currentAngle % 360) * Math.PI / 180;
@@ -173,7 +162,8 @@ function drawWheel() {
         ctx.fillStyle = slice.color;
         ctx.fill();
         
-        ctx.lineWidth = width * 0.005; // 線の太さもサイズに合わせて微調整（約2px〜）
+        // 線の太さをサイズに合わせて調整
+        ctx.lineWidth = Math.max(2, width * 0.005);
         ctx.strokeStyle = "#fff";
         ctx.stroke();
 
@@ -183,7 +173,7 @@ function drawWheel() {
         ctx.textAlign = "right";
         ctx.fillStyle = "#fff";
         
-        // フォントサイズも動的に計算 (半径の10%くらい)
+        // フォントサイズ動的計算
         const fontSize = Math.max(14, radius * 0.12);
         ctx.font = `bold ${fontSize}px 'Yusei Magic', Arial`;
         
@@ -192,7 +182,6 @@ function drawWheel() {
         ctx.shadowOffsetX = 1;
         ctx.shadowOffsetY = 1;
         
-        // 文字配置位置（半径より少し内側）
         ctx.fillText(slice.name, radius * 0.85, fontSize * 0.35);
         ctx.restore();
 
@@ -201,7 +190,6 @@ function drawWheel() {
     
     // 中央ピン
     ctx.beginPath();
-    // ピンのサイズも少し動的に
     const pinRadius = Math.max(10, radius * 0.08);
     ctx.arc(centerX, centerY, pinRadius, 0, 2 * Math.PI);
     ctx.fillStyle = "#fff";
@@ -372,7 +360,6 @@ function addSettingRow(item = null, index = null) {
     const msg = item ? item.message : "おめでとう！";
     const color = item ? item.color : getRandomColor();
 
-    // 入力欄にplaceholderを追加して、スマホでのカード表示時にわかりやすくします
     let html = `
         <input type="color" name="color" value="${color}">
         <input type="text" name="itemName" value="${nameVal}" placeholder="項目名">
